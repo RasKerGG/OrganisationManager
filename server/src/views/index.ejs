@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная страница</title>
+    <style>
+        :root {
+            --primary-color: <%= currentSettings.primaryColor %>;
+            --background-color: <%= currentSettings.theme === 'dark' ? '#2d2d2d' : '#ffffff' %>;
+            --text-color: <%= currentSettings.theme === 'dark' ? '#ffffff' : '#333333' %>;
+            --border-color: <%= currentSettings.theme === 'dark' ? '#444444' : '#dddddd' %>;
+        }
+
+        body {
+            background: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .tree-container, .employees-container {
+            border: 1px solid var(--border-color);
+            background: <%= currentSettings.theme === 'dark' ? '#222222' : '#f8f9fa' %>;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .employee-table {
+            background: <%= currentSettings.theme === 'dark' ? '#333333' : '#ffffff' %>;
+            border-color: var(--border-color);
+        }
+
+        td{
+            color: <%= currentSettings.theme === 'dark' ? '#ffffff' :  '#333333' %>;
+        }
+
+        .employee-table th,
+        .employee-table td {
+            border-color: var(--border-color) !important;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('theme') !== '<%= currentSettings.theme %>') {
+                localStorage.setItem('theme', '<%= currentSettings.theme %>');
+                location.reload();
+            }
+        });
+    </script>
+    <link href="/css/main.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.min.js" integrity="sha384-VQqxDN0EQCkWoxt/0vsQvZswzTHUVOImccYmSyhJTp7kGtPed0Qcx8rK9h9YEgx+" crossorigin="anonymous"></script>
+</head>
+<body>
+<%-include('navbar')%>
+<div class="container mt-3">
+
+    <div class="tree-container">
+        <h2>Организационная структура</h2>
+
+        <div class="form-section">
+            <h3>Добавить филиал</h3>
+            <form action="/api/branches" method="POST" enctype="application/x-www-form-urlencoded">
+                <div class="form-group">
+                    <input type="text" name="name" placeholder="Название филиала" required>
+                </div>
+                <div class="form-group">
+                    <select name="parent_id"> <!-- Было parent_id -->
+                        <option value="">Без родителя</option>
+                        <% allBranches.forEach(branch => { %>
+                            <option value="<%= branch.id %>"><%= branch.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <button type="submit"
+                        style="background: var(--primary-color);
+               color: <%= currentSettings.theme === 'dark' ? '#fff' : '#333' %>">
+                    Добавить филиал
+                </button>
+            </form>
+        </div>
+
+        <div class="tree">
+            <% function renderBranch(branch) { %>
+                <div class="branch-node">
+                    <div class="branch-name">
+                        <%= branch.name %>
+                        <% if (branch.children?.length) { %>
+                            <span style="color: #666; font-size: 0.8em">(↓ <%= branch.children.length %>)</span>
+                        <% } %>
+                    </div>
+
+                    <% if (branch.children?.length) { %>
+                        <div class="branch-children">
+                            <% branch.children.forEach(child => renderBranch(child)); %>
+                        </div>
+                    <% } %>
+                </div>
+            <% } %>
+
+            <% branches.forEach(branch => renderBranch(branch)); %>
+        </div>
+    </div>
+
+    <div class="employees-container">
+        <h2> Сотрудники филиала</h2>
+
+        <div class="form-section">
+            <h3>Добавить сотрудника</h3>
+            <form action="/api/employees" method="POST">
+                <div class="form-group">
+                    <input type="text" name="fullName" placeholder="Полное имя" required>
+                </div>
+                <div class="form-group">
+                    <input type="date" name="joinDate" required>
+                </div>
+                <div class="form-group">
+                    <input type="number" name="salary" step="0.01" placeholder="Зарплата" required>
+                </div>
+                <div class="form-group">
+                    <select name="branchId" required>
+                        <% allBranches.forEach(branch => { %>
+                            <option value="<%= branch.id %>"><%= branch.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <select name="position_id" required>
+                        <% positions.forEach(position => { %>
+                            <option value="<%= position.id %>"><%= position.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <button type="submit">Добавить сотрудника</button>
+            </form>
+        </div>
+        <table class="employee-table">
+            <thead>
+            <tr>
+                <th>
+                    <a href="?sortBy=fullName&order=<%= sortBy === 'fullName' && order === 'ASC' ? 'DESC' : 'ASC' %>">
+                        ФИО
+                        <% if(sortBy === 'fullName') { %>
+                            <%= order === 'ASC' ? '↑' : '↓' %>
+                        <% } %>
+                    </a>
+                </th>
+                <th>
+                    <a href="?sortBy=branchName&order=<%= sortBy === 'branchName' && order === 'ASC' ? 'DESC' : 'ASC' %>">
+                        Филиал
+                        <% if(sortBy === 'branchName') { %>
+                            <%= order === 'ASC' ? '↑' : '↓' %>
+                        <% } %>
+                    </a>
+                </th>
+                <th>
+                    <a href="?sortBy=joinDate&order=<%= sortBy === 'joinDate' && order === 'ASC' ? 'DESC' : 'ASC' %>">
+                        Дата приёма
+                        <% if(sortBy === 'joinDate') { %>
+                            <%= order === 'ASC' ? '↑' : '↓' %>
+                        <% } %>
+                    </a>
+                </th>
+                <th>
+                    <a href="?sortBy=salary&order=<%= sortBy === 'salary' && order === 'ASC' ? 'DESC' : 'ASC' %>">
+                        Зарплата
+                        <% if(sortBy === 'salary') { %>
+                            <%= order === 'ASC' ? '↑' : '↓' %>
+                        <% } %>
+                    </a>
+                </th>
+                <th>
+                    <a href="?sortBy=positionName&order=<%= sortBy === 'positionName' && order === 'ASC' ? 'DESC' : 'ASC' %>">
+                        Должность
+                        <% if(sortBy === 'positionName') { %>
+                            <%= order === 'ASC' ? '↑' : '↓' %>
+                        <% } %>
+                    </a>
+                </th>
+                <th>Действия</th>
+            </tr>
+            </thead>
+            <tbody>
+            <% employees.forEach(employee => { %>
+                <tr>
+                    <td><%= employee.fullName %></td>
+                    <td><%= employee.branchName ? employee.branchName : 'N/A' %></td>
+                    <td><%= new Date(employee.joinDate).toLocaleDateString() %></td>
+                    <td><%= employee.salary.toLocaleString() %> ₽</td>
+                    <td><%= employee.positionName ? employee.positionName : 'N/A' %></td>
+                    <td>
+                        <form action="/employees/<%= employee.id %>" method="POST">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" style="background: #dc3545; padding: 2px 8px">🗑️</button>
+                        </form>
+                    </td>
+                </tr>
+            <% }); %>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
