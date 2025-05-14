@@ -88,8 +88,7 @@ const OrganizationalStructure = () => {
     }
 
 
-    const handleEditEmployee = (employeeId) => {
-        const employee = employees.find(e => e.id === employeeId);
+    const handleEditEmployee = (employee) => {
         setEditingEmployee(employee);
         setShowEditForm(true);
     };

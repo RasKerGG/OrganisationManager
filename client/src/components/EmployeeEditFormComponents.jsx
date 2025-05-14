@@ -21,7 +21,11 @@ export default function EmployeeEditForm({
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.patch(`http://localhost:3000/api/employees`, formData);
+
+            await axios.patch(
+                `https://wantonly-sublime-raccoon.cloudpub.ru/api/employees/${formData.id}`,
+                formData
+            );
             onSave();
         } catch (error) {
             console.error("Error updating employee:", error);

@@ -106,9 +106,21 @@ exports.getCertificate = async (req, res) => {
     }
 };
 
+exports.getEmployeeById = async (req, res) => {
+    try {
+        const employee = await Employee.findByPk(req.params.id)
+        res.json(employee)
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).send(error.message);
+    }
+};
+
 exports.editEmployee = async (req, res) => {
     try {
-        const { id, fullName, joinDate, branchId, positionId, salary } = req.body;
+        const id = req.params.id; // Получаем ID из URL
+        const {fullName, joinDate, branchId, positionId, salary } = req.body;
 
         if (!id) {
             return res.status(400).send({ message: "ID сотрудника обязателен" });
