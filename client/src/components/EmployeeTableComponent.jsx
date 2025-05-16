@@ -1,29 +1,41 @@
 import React, { useState } from 'react';
 import { AgGridReact } from "ag-grid-react";
 
+import {
+    IconButton,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    TableSortLabel
+} from "@mui/material";
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+
 
 const EmployeeButtons = (params) => {
     return (
         <>
-            <button
-                onClick={() => params.onEdit(params.data)}
-                style={{ background: '#206fd5', padding: '4px 6px' }}
+            <IconButton
+                onClick={() => params.onEdit(params.data)} color="primary"
             >
-                ✏️️
-            </button>
-            <button
-                onClick={() => params.onDelete(params.data.id)}
-                style={{ background: '#ac1a1a', padding: '4px 6px', marginLeft: '10px' }}
+                <EditIcon/>
+            </IconButton>
+            <IconButton
+                onClick={() => params.onDelete(params.data.id)} color="error"
             >
-                🗑️
-            </button>
+                <DeleteIcon/>
+            </IconButton>
         </>
     );
 };
 
 const EmployeeTable = ({ employees, onDelete, onEdit }) => {
     const [colDefs] = useState([
-        { field: "fullName", headerName: "Полное имя" },
+        { field: "fullName", headerName: "ФИО" },
         {
             headerName: "Дата найма",
             valueGetter: (params) => new Date(params.data.joinDate).toLocaleDateString()

@@ -1,6 +1,19 @@
 import { useState } from "react";
 import axios from "axios";
 
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField,
+    Button,
+    MenuItem,
+    Select,
+    FormControl,
+    InputLabel
+} from "@mui/material";
+
 export default function EmployeeEditForm({
 
                                              employee,
@@ -33,73 +46,75 @@ export default function EmployeeEditForm({
     };
 
     return (
-        <div className="edit-form-overlay">
-            <form onSubmit={handleSubmit} className="edit-form">
-                <h3>Редактировать сотрудника</h3>
+      <Dialog open={true} onClose={onCancel} maxWidth="sm">
+            <form onSubmit={handleSubmit}>
+                <DialogTitle>Редактировать сотрудника</DialogTitle>
 
-                <label>
-                    Имя:
-                    <input
-                        value={formData.fullName}
-                        onChange={e => setFormData({...formData, fullName: e.target.value})}
-                    >
-                    </input>
-                </label>
+                <DialogContent>
+                    <TextField
+                    margin="normal"
+                    fullWidth
+                    label="Имя"
+                    value={formData.fullName}
+                    onChange={e => setFormData({...formData, fullName: e.target.value})}/>
 
-                <label>
-                    Дата приёма:
-                    <input
-                        type="date"
-                        value={formData.joinDate}
-                        onChange={e => setFormData({...formData, joinDate: e.target.value})}
-                        required
-                    />
-                </label>
+                <TextField
+                    margin="normal"
+                    fullWidth
+                    label="Дата приёма"
+                    type="date"
+                    value={formData.joinDate}
+                    onChange={e => setFormData({...formData, joinDate: e.target.value})}
+                />
 
-                <label>
-                    Зарплата:
-                    <input
-                        type="number"
-                        step="0.01"
-                        value={formData.salary}
-                        onChange={e => setFormData({...formData, salary: e.target.value})}
-                        required
-                    />
-                </label>
+                <TextField
+                    margin="normal"
+                    fullWidth
+                    label="Зарплата"
+                    type="number"
+                    value={formData.salary}
+                    onChange={e => setFormData({...formData, salary: e.target.value})}
+                />
 
-                <label>
-                    Филиал:
-                    <select
+
+                <FormControl fullWidth margin="normal">
+                    <InputLabel>Филиал</InputLabel>
+                    <Select
                         value={formData.branchId}
+                        label="Филиал"
                         onChange={e => setFormData({...formData, branchId: e.target.value})}
                     >
                         {branches.map(branch => (
-                            <option key={branch.id} value={branch.id}>
+                            <MenuItem key={branch.id} value={branch.id}>
                                 {branch.name}
-                            </option>
+                            </MenuItem>
                         ))}
-                    </select>
-                </label>
+                    </Select>
+                </FormControl>
 
-                <label>
-                    Должность:
-                    <select
+                <FormControl fullWidth margin="normal">
+                    <InputLabel>Должность</InputLabel>
+                    <Select
                         value={formData.positionId}
+                        label="Должность"
                         onChange={e => setFormData({...formData, positionId: e.target.value})}
                     >
                         {positions.map(position => (
-                            <option key={position.id} value={position.id}>
+                            <MenuItem key={position.id} value={position.id}>
                                 {position.name}
-                            </option>
+                            </MenuItem>
                         ))}
-                    </select>
-                </label>
+                    </Select>
+                </FormControl>
+                </DialogContent>
 
-                <div className="form-buttons">
-                    <button type="submit">Сохранить</button>
-                    <button type="button" onClick={onCancel}>Отмена</button>
-                </div>
+                <DialogActions>
+                    <Button onClick={onCancel}>Отмена</Button>
+                    <Button type="submit" variant="contained" color="primary">
+                        Сохранить
+                    </Button>
+                </DialogActions>
             </form>
-        </div>
+      </Dialog>
     );
 }
