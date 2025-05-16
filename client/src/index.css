@@ -308,7 +308,16 @@ select {
     border-color: var(--border-color);
     transition: all 0.3s;
 }
-
+.inputColor{
+    color: var(--text-color);
+}
+.input,
+.select {
+    background: var(--background-color);
+    color: var(--text-color);
+    border-color: var(--border-color);
+    transition: all 0.3s;
+}
 button {
     background: var(--button-bg);
     color: var(--text-color);

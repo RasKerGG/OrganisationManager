@@ -4,6 +4,19 @@ import EmployeeEditForm from "./EmployeeEditFormComponents.jsx";
 import {BranchTree} from "./BranchTreeComponent.jsx";
 import EmployeeTable from "./EmployeeTableComponent.jsx";
 
+
+import {
+    Grid,
+    Typography,
+    TextField,
+    Button,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Box
+} from "@mui/material";
+
 const OrganizationalStructure = () => {
     const [branches, setBranches] = useState([]);
     const [allBranches, setAllBranches] = useState([]);
@@ -163,35 +176,43 @@ const OrganizationalStructure = () => {
                 />
             )}
             <div className="container mt-3">
+
                 <div className="tree-container">
-                    <h2>Организационная структура</h2>
+                    <Typography variant="h4" gutterBottom>
+                        Организационная структура
+                    </Typography>
 
                     <div className="form-section">
-                        <h3>Добавить филиал</h3>
+                        <Typography variant="h6" gutterBottom>
+                            Добавить филиал
+                        </Typography>
                         <form onSubmit={handleAddBranch}>
-                            <div className="form-group">
-                                <input
-                                    type="text"
-                                    placeholder="Название филиала"
-                                    value={newBranch.name}
-                                    onChange={e => setNewBranch({ ...newBranch, name: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <select
+                            <TextField
+                                fullWidth
+                                label="Название филиала"
+                                value={newBranch.name}
+                                onChange={e => setNewBranch({ ...newBranch, name: e.target.value })}
+                                margin="normal"
+                            />
+
+                            <FormControl fullWidth margin="normal">
+                                <InputLabel>Родительский филиал</InputLabel>
+                                <Select
                                     value={newBranch.parent_id}
                                     onChange={e => setNewBranch({ ...newBranch, parent_id: e.target.value })}
                                 >
-                                    <option value="">Без родителя</option>
+                                    <MenuItem value="">Без родителя</MenuItem>
                                     {allBranches.map(branch => (
-                                        <option key={branch.id} value={branch.id}>
+                                        <MenuItem key={branch.id} value={branch.id}>
                                             {branch.name}
-                                        </option>
+                                        </MenuItem>
                                     ))}
-                                </select>
-                            </div>
-                            <button type="submit">Добавить филиал</button>
+                                </Select>
+                            </FormControl>
+
+                            <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+                                Добавить филиал
+                            </Button>
                         </form>
 
                     </div>
@@ -203,76 +224,84 @@ const OrganizationalStructure = () => {
                     />
                 </div>
 
-                <div className="employees-container">
-                    <h2>Сотрудники филиала</h2>
+                <Grid item xs={12} md={6}>
+
 
                     <div className="form-section">
-                        <h3>Добавить сотрудника</h3>
+                        <Typography variant="h4" gutterBottom>
+                            Добавить сотрудника
+                        </Typography>
+                        <Typography variant="h6" gutterBottom>
+                            Добавить сотрудника
+                        </Typography>
                         <form onSubmit={handleAddEmployee}>
-                            <div className="form-group">
-                                <input
-                                    type="text"
-                                    placeholder="Полное имя"
-                                    value={newEmployee.fullName}
-                                    onChange={e => setNewEmployee({...newEmployee, fullName: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <input
-                                    type="date"
-                                    value={newEmployee.joinDate}
-                                    onChange={e => setNewEmployee({...newEmployee, joinDate: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    placeholder="Зарплата"
-                                    value={newEmployee.salary}
-                                    onChange={e => setNewEmployee({...newEmployee, salary: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <select
+                            <TextField
+                                fullWidth
+                                label="Полное имя"
+                                value={newEmployee.fullName}
+                                onChange={e => setNewEmployee({...newEmployee, fullName: e.target.value})}
+                                margin="normal"
+                            />
+
+                            <TextField
+                                fullWidth
+                                label="Дата приёма"
+                                type="date"
+                                InputLabelProps={{shrink: true}}
+                                value={newEmployee.joinDate}
+                                onChange={e => setNewEmployee({...newEmployee, joinDate: e.target.value})}
+                                margin="normal"
+                            />
+
+                            <TextField
+                                fullWidth
+                                label="Зарплата"
+                                type="number"
+                                inputProps={{step: "0.01"}}
+                                value={newEmployee.salary}
+                                onChange={e => setNewEmployee({...newEmployee, salary: e.target.value})}
+                                margin="normal"
+                            />
+                            <FormControl fullWidth margin="normal">
+                                <InputLabel>Филиал</InputLabel>
+                                <Select
                                     value={newEmployee.branchId || ''}
-                                    onChange={e => setNewEmployee({
-                                        ...newEmployee,
-                                        branchId: e.target.value ? Number(e.target.value) : null
-                                    })}
-                                    required
+                                    onChange={e => setNewEmployee({...newEmployee, branchId: e.target.value})}
                                 >
-                                    <option value="">Выберите филиал</option>
+                                    <MenuItem value="">Выберите филиал</MenuItem>
                                     {allBranches.map(branch => (
-                                        <option key={branch.id} value={branch.id}>
+                                        <MenuItem key={branch.id} value={branch.id}>
                                             {branch.name}
-                                        </option>
+                                        </MenuItem>
                                     ))}
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <select
+                                </Select>
+                            </FormControl>
+                            <FormControl fullWidth margin="normal">
+                                <InputLabel>Должность</InputLabel>
+                                <Select
                                     value={newEmployee.positionId || ''}
-                                    onChange={e => setNewEmployee({
-                                        ...newEmployee,
-                                        positionId: e.target.value ? Number(e.target.value) : null
-                                    })}
-                                    required
+                                    onChange={e => setNewEmployee({...newEmployee, positionId: e.target.value})}
                                 >
-                                    <option value="">Выберите должность</option>
+                                    <MenuItem value="">Выберите должность</MenuItem>
                                     {positions.map(position => (
-                                        <option key={position.id} value={position.id}>
+                                        <MenuItem key={position.id} value={position.id}>
                                             {position.name}
-                                        </option>
+                                        </MenuItem>
                                     ))}
-                                </select>
-                            </div>
-                            <button type="submit">Добавить сотрудника</button>
+                                </Select>
+                            </FormControl>
+                            <Box sx={{display: 'flex', gap: 2, mt: 2}}>
+                                <Button type="submit" variant="contained">
+                                    Добавить сотрудника
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    onClick={handleBranchSelectRemove}
+                                >
+                                    Показать всех
+                                </Button>
+                            </Box>
                         </form>
-                        <button onClick={handleBranchSelectRemove} style={{marginTop: '10px'}}>Показать всех сотрудников</button>
                     </div>
 
                     <EmployeeTable
@@ -283,7 +312,7 @@ const OrganizationalStructure = () => {
                         onDelete={handleDeleteEmployee}
                         onEdit={handleEditEmployee}
                     />
-                </div>
+                </Grid>
             </div>
         </div>
     );
