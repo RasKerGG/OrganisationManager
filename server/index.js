@@ -12,8 +12,6 @@ const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '127.0.0.1';
 
 
-app.set('view engine', 'ejs');
-app.set('views', './src/views');
 app.use(express.static('./public'));
 app.use(methodOverride('_method'));
 
@@ -31,8 +29,6 @@ app.use('/api/positions', require('./src/routes/positions'));
 
 app.use('/', require('./src/routes/index'));
 app.use('/certificate', require('./src/routes/certificate'));
-app.use('/settings', require('./src/routes/settings'));
-app.use('/employees', require('./src/routes/employees'));
 const server = app.listen(PORT, HOST, () => {
     try {
         sequelize.authenticate().then(() => {
