@@ -1,53 +1,77 @@
-import {useEffect, useState} from "react";
+import { useState, useEffect } from 'react';
+import {
+    AppBar,
+    Toolbar,
+    Typography,
+    IconButton,
+    Box,
+    Button,
+    useTheme
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 
 export default function NavbarComponent() {
-    const [theme, setTheme] = useState('light')
+    const [theme, setTheme] = useState('light');
+    const muiTheme = useTheme();
 
     const fetchTheme = () => {
         const currentTheme = localStorage.getItem('theme') || 'light';
         setTheme(currentTheme);
         document.body.className = currentTheme === 'dark' ? 'dark-theme' : '';
-    }
+    };
 
     useEffect(() => {
         fetchTheme();
     }, [theme]);
 
+
+    const navItems = [
+        { name: 'Главная', path: '/' },
+        { name: 'Отчет', path: '/certificate' },
+        { name: 'Настройки', path: '/settings' }
+    ];
+
     return (
-        <nav className={`navbar navbar-expand-lg ${theme === 'dark' ? 'navbar-dark' : 'navbar-light'}`}
-             style={{
-                 backgroundColor: 'var(--navbar-bg)',
-                 borderBottom: '1px solid var(--border-color)'
-             }}>
-            <div className="container-fluid">
-                <a className="navbar-brand" href="#" style={{color: 'var(--text-color)'}}>
+        <AppBar
+            position="static"
+            sx={{
+                backgroundColor: 'var(--navbar-bg)',
+                borderBottom: '1px solid var(--border-color)',
+                boxShadow: 'none'
+            }}
+        >
+            <Toolbar sx={{ justifyContent: 'space-between' }}>
+                <Typography
+                    variant="h6"
+                    component="a"
+                    href="#"
+                    sx={{
+                        color: 'var(--text-color)',
+                        textDecoration: 'none',
+                        mr: 2
+                    }}
+                >
                     Навигация
-                </a>
-                <button className="navbar-toggler"
-                        type="button"
-                        style={{borderColor: 'var(--text-color)'}}>
-                    <span className="navbar-toggler-icon"></span>
-                </button>
-                <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
-                    <div className="navbar-nav">
-                        <a className="nav-link"
-                           href="/"
-                           style={{color: 'var(--text-color)'}}>
-                            Главная
-                        </a>
-                        <a className="nav-link"
-                           href="/certificate"
-                           style={{color: 'var(--text-color)'}}>
-                            Отчет
-                        </a>
-                        <a className="nav-link"
-                           href="/settings"
-                           style={{color: 'var(--text-color)'}}>
-                            Настройки
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </nav>
-    )
+                </Typography>
+
+                <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                    {navItems.map((item) => (
+                        <Button
+                            key={item.path}
+                            href={item.path}
+                            sx={{
+                                color: 'var(--text-color)',
+                                textTransform: 'none',
+                                mx: 1,
+                                fontSize: '16px'
+                            }}
+                            variant="text"
+                        >
+                            {item.name}
+                        </Button>
+                    ))}
+                </Box>
+            </Toolbar>
+        </AppBar>
+    );
 }
