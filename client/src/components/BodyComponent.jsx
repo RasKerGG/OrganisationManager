@@ -24,7 +24,6 @@ const OrganizationalStructure = () => {
     const [positions, setPositions] = useState([]);
     const [sortBy, setSortBy] = useState('fullName');
     const [order, setOrder] = useState('ASC');
-    const [currentTheme, setTheme] = useState('light');
     const [selectedBranch, setSelectedBranch] = useState();
     const [editingEmployee, setEditingEmployee] = useState(null);
     const [showEditForm, setShowEditForm] = useState(false);
@@ -40,15 +39,9 @@ const OrganizationalStructure = () => {
 
     useEffect(() => {
         fetchData();
-        fetchTheme();
     }, [sortBy, order, selectedBranch]);
 
 
-    const fetchTheme = () => {
-        let currentTheme = localStorage.getItem('theme')
-        setTheme(currentTheme);
-        document.body.className = currentTheme === 'dark' ? 'dark-theme' : '';
-    }
 
     const fetchData = async () => {
         if (selectedBranch !== undefined) {

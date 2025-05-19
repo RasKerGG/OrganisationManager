@@ -5,10 +5,11 @@ import BodyComponent from "./components/BodyComponent.jsx";
 import CertificateComponent from "./components/CertificateComponent.jsx";
 import SettingsComponent from "./components/SettingsComponent.jsx";
 import NotFoundComponent from "./components/NotFoundComponent.jsx";
-
+import { ThemeProvider } from "./components/ThemeContext";
 function App() {
   return (
     <>
+        <ThemeProvider>
         <NavbarComponent />
         <Routes>
             <Route path="/" element={<BodyComponent/>} />
@@ -16,7 +17,7 @@ function App() {
             <Route path="/settings" element={<SettingsComponent/>}/>
             <Route path="*" element={<NotFoundComponent/>}/>
         </Routes>
-
+        </ThemeProvider>
     </>
   )
 }

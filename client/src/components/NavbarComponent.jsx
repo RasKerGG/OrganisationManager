@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import {
     AppBar,
     Toolbar,
@@ -11,19 +10,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 
 export default function NavbarComponent() {
-    const [theme, setTheme] = useState('light');
     const muiTheme = useTheme();
-
-    const fetchTheme = () => {
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        setTheme(currentTheme);
-        document.body.className = currentTheme === 'dark' ? 'dark-theme' : '';
-    };
-
-    useEffect(() => {
-        fetchTheme();
-    }, [theme]);
-
 
     const navItems = [
         { name: 'Главная', path: '/' },

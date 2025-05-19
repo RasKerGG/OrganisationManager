@@ -1,21 +1,11 @@
-import {useEffect, useState} from "react";
+import { useTheme } from "./ThemeContext";
 
 export default function SettingsComponent() {
-    const [theme, setTheme] = useState("light");
-    const [font, setFont] = useState();
-
-    useEffect(() => {
-        const savedTheme = localStorage.getItem("theme") || "light";
-        setTheme(savedTheme);
-        document.body.className = savedTheme === "dark" ? "dark-theme" : "";
-    }, []);
+    const { theme, updateTheme } = useTheme();
 
     const handleThemeChange = (event) => {
-        const newTheme = event.target.value;
-        setTheme(newTheme);
-        localStorage.setItem("theme", newTheme);
-        document.body.className = newTheme === "dark" ? "dark-theme" : "";
-    }
+        updateTheme(event.target.value);
+    };
 
     return (
         <div className="settings-container">
