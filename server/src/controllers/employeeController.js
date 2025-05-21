@@ -1,50 +1,85 @@
 const { Employee, Branch, Position} = require("../models");
 const {Op, Sequelize} = require("sequelize");
 
+const operatorMap = {
+    eq: Op.eq,
+    ne: Op.ne,
+    lt: Op.lt,
+    lte: Op.lte,
+    gt: Op.gt,
+    gte: Op.gte,
+    between: Op.between,
+    iLike: Op.iLike,
+    notLike: Op.notLike,
+    startsWith: Op.startsWith,
+    endsWith: Op.endsWith
+};
+
+
 exports.getEmployees = async (req, res) => {
     try {
-
-        const { sortBy = 'id', order = 'ASC', branchId} = req.query;
-        const validFields = ['id', 'fullName', 'joinDate', 'salary', 'branchId', 'positionId'];
-
-        if (!validFields.includes(sortBy)) {
-            return res.status(400).json({ error: 'Invalid sort field' });
-        }
+        const { startRow = 0, endRow = 10, sortModel = [], filterModel = {} } = req.body;
 
         const whereCondition = {};
-        if (branchId) {
-            whereCondition.branchId = {
-                [Op.in]: Array.isArray(branchId) ? branchId : [branchId]
+        if (filterModel.branchId) {
+            filterModel.branchId = {
+                [Op.eq]: parseInt(filterModel.branchId)
             };
         }
+        Object.entries(filterModel).forEach(([field, conditions]) => {
+            const fieldConditions = {};
+            for (const [operator, value] of Object.entries(conditions)) {
+                const sequelizeOp = operatorMap[operator];
+                if (sequelizeOp) {
+                    fieldConditions[sequelizeOp] = value;
+                }
+            }
+            whereCondition[field] = fieldConditions;
+        });
 
-        const employees = await Employee.findAll({
+        const order = sortModel.map(sort => {
+            if (sort.colId === 'branchName') {
+                return [{ model: Branch, as: 'branch' }, 'name', sort.sort.toUpperCase()];
+            }
+            if (sort.colId === 'positionName') {
+                return [{ model: Position, as: 'position' }, 'name', sort.sort.toUpperCase()];
+            }
+            return [sort.colId, sort.sort.toUpperCase()];
+        });
+
+        const { count, rows } = await Employee.findAndCountAll({
+            where: whereCondition,
             include: [
-                {
-                    model: Branch,
-                    as: 'branch',
-                    attributes: ['name'],
-                    where: branchId ? {} : undefined
-                },
-
                 {
                     model: Position,
                     as: 'position',
                     attributes: ['name']
+                },
+                {
+                    model: Branch,
+                    as: 'branch',
+                    attributes: ['name']
                 }
             ],
-            where: whereCondition,
-            order: [[sortBy, order]],
+            order: order,
             raw: true,
-            nest: true
+            nest: true,
+            limit: endRow - startRow,
+            offset: startRow
         });
 
-        res.json(employees);
+        const formatted = rows.map(e => ({
+            ...e,
+            positionName: e.position.name,
+            branchName: e.branch.name
+        }));
 
+        res.json({ rows: formatted, lastRow: count });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).send(error.message);
     }
 }
+
 
 exports.addEmployee = async (req, res) => {
     try {
@@ -80,32 +115,69 @@ exports.deleteEmployee = async (req, res) => {
 
 exports.getCertificate = async (req, res) => {
     try {
-        const employees = await Employee.findAll({
-            where: {
-                salary: {
-                    [Op.lt]: 30000
-                },
-                join_date: {
-                    [Op.lt]: Sequelize.literal(`CURRENT_DATE - INTERVAL '3 years'`)
+        const { startRow = 0, endRow = 10, sortModel = [], filterModel = {} } = req.body;
+
+        const whereCondition = {};
+        Object.entries(filterModel).forEach(([field, conditions]) => {
+            const fieldConditions = {};
+            for (const [operator, value] of Object.entries(conditions)) {
+                const sequelizeOp = operatorMap[operator];
+                if (sequelizeOp) {
+                    fieldConditions[sequelizeOp] = value;
                 }
-            },
-            include: [
-                { model: Position, as: 'position', attributes: ['name'] }
-            ],
-            raw: true
+            }
+            whereCondition[field] = fieldConditions;
         });
 
-        const formattedEmployees = employees.map(e => ({
+        const order = sortModel.map(sort => [
+            sort.colId === 'branchName' ? { model: Branch, as: 'branch' } :
+                sort.colId === 'positionName' ? { model: Position, as: 'position' } :
+                    sort.colId,
+            sort.sort.toUpperCase()
+        ]);
+
+        const { count, rows } = await Employee.findAndCountAll({
+            where: {
+                [Op.and]: [
+                    whereCondition,
+                    {
+                        salary: { [Op.lt]: 30000 },
+                        join_date: {
+                            [Op.lt]: Sequelize.literal(`CURRENT_DATE - INTERVAL '3 years'`)
+                        }
+                    }
+                ]
+            },
+            include: [
+                {
+                    model: Position,
+                    as: 'position',
+                    attributes: ['name']
+                },
+                {
+                    model: Branch,
+                    as: 'branch',
+                    attributes: ['name']
+                }
+            ],
+            order: order,
+            raw: true,
+            nest: true,
+            limit: endRow - startRow,
+            offset: startRow
+        });
+
+        const formatted = rows.map(e => ({
             ...e,
-            positionName: e['position.name']
+            positionName: e.position.name,
+            branchName: e.branch.name
         }));
 
-        res.json(formattedEmployees);
+        res.json({ rows: formatted, lastRow: count });
     } catch (error) {
         res.status(500).send(error.message);
     }
 };
-
 exports.getEmployeeById = async (req, res) => {
     try {
         const employee = await Employee.findByPk(req.params.id)
@@ -119,7 +191,7 @@ exports.getEmployeeById = async (req, res) => {
 
 exports.editEmployee = async (req, res) => {
     try {
-        const id = req.params.id; // Получаем ID из URL
+        const id = req.params.id;
         const {fullName, joinDate, branchId, positionId, salary } = req.body;
 
         if (!id) {

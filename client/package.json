@@ -15,6 +15,7 @@
     "@mui/icons-material": "^7.1.0",
     "@mui/material": "^7.1.0",
     "ag-grid-community": "^33.3.0",
+    "ag-grid-enterprise": "^33.3.0",
     "ag-grid-react": "^33.3.0",
     "axios": "^1.9.0",
     "react": "^19.0.0",

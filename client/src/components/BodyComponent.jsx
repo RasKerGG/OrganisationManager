@@ -20,10 +20,7 @@ import {
 const OrganizationalStructure = () => {
     const [branches, setBranches] = useState([]);
     const [allBranches, setAllBranches] = useState([]);
-    const [employees, setEmployees] = useState([]);
     const [positions, setPositions] = useState([]);
-    const [sortBy, setSortBy] = useState('fullName');
-    const [order, setOrder] = useState('ASC');
     const [selectedBranch, setSelectedBranch] = useState();
     const [editingEmployee, setEditingEmployee] = useState(null);
     const [showEditForm, setShowEditForm] = useState(false);
@@ -39,43 +36,22 @@ const OrganizationalStructure = () => {
 
     useEffect(() => {
         fetchData();
-    }, [sortBy, order, selectedBranch]);
+    }, [selectedBranch]);
 
 
 
     const fetchData = async () => {
-        if (selectedBranch !== undefined) {
-            try {
-                const [branchesRes, employeesRes, positionsRes] = await Promise.all([
+        try {
+            const [branchesRes, positionsRes] = await Promise.all([
+                axios.get('https://wantonly-sublime-raccoon.cloudpub.ru/api/branches'),
+                axios.get('https://wantonly-sublime-raccoon.cloudpub.ru/api/positions')
+            ]);
 
-                    axios.get('https://wantonly-sublime-raccoon.cloudpub.ru/api/branches'),
-                    axios.get(`https://wantonly-sublime-raccoon.cloudpub.ru/api/employees?sortBy=${sortBy}&order=${order}&branchId=${selectedBranch}`),
-                    axios.get('https://wantonly-sublime-raccoon.cloudpub.ru/api/positions')
-                ]);
-
-                setBranches(branchesRes.data);
-                setAllBranches(branchesRes.data);
-                setEmployees(employeesRes.data);
-                setPositions(positionsRes.data);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        } else {
-            try {
-                const [branchesRes, employeesRes, positionsRes] = await Promise.all([
-
-                    axios.get('https://wantonly-sublime-raccoon.cloudpub.ru/api/branches'),
-                    axios.get(`https://wantonly-sublime-raccoon.cloudpub.ru/api/employees?sortBy=${sortBy}&order=${order}`),
-                    axios.get('https://wantonly-sublime-raccoon.cloudpub.ru/api/positions')
-                ]);
-
-                setBranches(branchesRes.data);
-                setAllBranches(branchesRes.data);
-                setEmployees(employeesRes.data);
-                setPositions(positionsRes.data);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
+            setBranches(branchesRes.data);
+            setAllBranches(branchesRes.data);
+            setPositions(positionsRes.data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
         }
     };
 
@@ -138,21 +114,6 @@ const OrganizationalStructure = () => {
         }
     };
 
-    const handleSort = (column) => {
-        const backendSortFieldMap = {
-            fullName: 'fullName',
-            branchName: 'branchId',
-            joinDate: 'joinDate',
-            salary: 'salary',
-            positionName: 'positionId'
-        };
-
-        const backendField = backendSortFieldMap[column] || column;
-        const newOrder = sortBy === backendField && order === 'ASC' ? 'DESC' : 'ASC';
-
-        setSortBy(backendField);
-        setOrder(newOrder);
-    };
 
     return (
         <div>
@@ -212,7 +173,7 @@ const OrganizationalStructure = () => {
 
                     <BranchTree
                         branches={branches}
-                        onBranchSelect={(id) => setSelectedBranch(id)}
+                        onBranchSelect={(id) => setSelectedBranch(Number(id))}
                         onBranchDelete={handleDeleteBranch}
                     />
                 </div>
@@ -298,12 +259,9 @@ const OrganizationalStructure = () => {
                     </div>
 
                     <EmployeeTable
-                        employees={employees}
-                        sortBy={sortBy}
-                        order={order}
-                        onSort={handleSort}
                         onDelete={handleDeleteEmployee}
                         onEdit={handleEditEmployee}
+                        branchId={selectedBranch}
                     />
                 </Grid>
             </div>
