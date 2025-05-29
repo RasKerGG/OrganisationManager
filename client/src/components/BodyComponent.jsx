@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import EmployeeEditForm from "./EmployeeEditFormComponents.jsx";
 import {BranchTree} from "./BranchTreeComponent.jsx";
 import EmployeeTable from "./EmployeeTableComponent.jsx";
 
+import { driver } from 'driver.js';
+import 'driver.js/dist/driver.css';
 
 import {
     Grid,
@@ -24,6 +26,9 @@ const OrganizationalStructure = () => {
     const [selectedBranch, setSelectedBranch] = useState();
     const [editingEmployee, setEditingEmployee] = useState(null);
     const [showEditForm, setShowEditForm] = useState(false);
+    const [isTourActive, setIsTourActive] = useState(false);
+    const driverRef = useRef();
+
 
     const [newBranch, setNewBranch] = useState({ name: '', parent_id: '' });
     const [newEmployee, setNewEmployee] = useState({
@@ -38,6 +43,61 @@ const OrganizationalStructure = () => {
         fetchData();
     }, [selectedBranch]);
 
+    const startTour = () => {
+        if (driverRef.current) {
+            driverRef.current.destroy();
+        }
+
+        driverRef.current = driver({
+            showProgress: true,
+            popoverClass: 'driverjs-theme',
+            steps: [
+                {
+                    element: '#tour-title',
+                    popover: {
+                        title: 'Организационная структура',
+                        description: 'Это главная страница управления организационной структурой компании.',
+                        side: 'bottom',
+                    }
+                },
+                {
+                    element: '#add-branch-form',
+                    popover: {
+                        title: 'Добавление филиала',
+                        description: 'Здесь вы можете создать новый филиал, указав его название и родительский филиал.',
+                        side: 'bottom',
+                    }
+                },
+                {
+                    element: '#branch-tree',
+                    popover: {
+                        title: 'Дерево филиалов',
+                        description: 'Иерархическое представление всех филиалов. Вы можете выбирать филиалы и управлять ими.',
+                        side: 'right',
+                    }
+                },
+                {
+                    element: '#add-employee-form',
+                    popover: {
+                        title: 'Добавление сотрудника',
+                        description: 'Заполните форму, чтобы добавить нового сотрудника в выбранный филиал.',
+                        side: 'left',
+                    }
+                },
+                {
+                    element: '#employee-table-section',
+                    popover: {
+                        title: 'Таблица сотрудников',
+                        description: 'Здесь отображаются все сотрудники. Вы можете редактировать или удалять записи.',
+                        side: 'top',
+                    }
+                }
+            ]
+        });
+
+        driverRef.current.drive();
+        setIsTourActive(true);
+    };
 
 
     const fetchData = async () => {
@@ -132,11 +192,11 @@ const OrganizationalStructure = () => {
             <div className="container mt-3">
 
                 <div className="tree-container">
-                    <Typography variant="h4" gutterBottom>
+                    <Typography variant="h4" gutterBottom id="tour-title">
                         Организационная структура
                     </Typography>
 
-                    <div className="form-section">
+                    <div className="form-section" id="add-branch-form">
                         <Typography variant="h6" gutterBottom>
                             Добавить филиал
                         </Typography>
@@ -170,18 +230,28 @@ const OrganizationalStructure = () => {
                         </form>
 
                     </div>
-
+                    <div id="branch-tree">
                     <BranchTree
                         branches={branches}
                         onBranchSelect={(id) => setSelectedBranch(Number(id))}
                         onBranchDelete={handleDeleteBranch}
-                    />
+                     />
+                    </div>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={startTour}
+                        >
+                            Помощь
+                        </Button>
+                    </Box>
                 </div>
 
                 <Grid item xs={12} md={6}>
 
 
-                    <div className="form-section">
+                    <div className="form-section" id="add-employee-form">
                         <Typography variant="h4" gutterBottom>
                             Добавить сотрудника
                         </Typography>
@@ -257,12 +327,13 @@ const OrganizationalStructure = () => {
                             </Box>
                         </form>
                     </div>
-
-                    <EmployeeTable
-                        onDelete={handleDeleteEmployee}
-                        onEdit={handleEditEmployee}
-                        branchId={selectedBranch}
-                    />
+                    <div id="employee-table-section">
+                        <EmployeeTable
+                            onDelete={handleDeleteEmployee}
+                            onEdit={handleEditEmployee}
+                            branchId={selectedBranch}
+                        />
+                    </div>
                 </Grid>
             </div>
         </div>
